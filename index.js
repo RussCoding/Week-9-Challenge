@@ -2,7 +2,7 @@
 const inquirer = require('inquirer');
 const generateMarkdown = require('./utils/generateMarkdown.js');
 const fs = require('fs');
-const util = require('util');
+//const util = require('util');
 // TODO: Create an array of questions for user input
 const questions = [
     {
@@ -28,7 +28,7 @@ const questions = [
     {
         type: 'input',
         name: 'contributing',
-        message: 'Who contributed to this project'
+        message: 'Please list anyone who contributed to this project'
     },
     {
         type: 'input',
@@ -41,11 +41,8 @@ const questions = [
         message: 'Pick the license type for your product',
         choices: [
             "Apache",
-            "GNU",
-            "ISU",
             "MIT",
-            "Mozilla",
-            "none"
+            "Mozilla"
         ]
     },
     {
@@ -65,25 +62,67 @@ const questions = [
 
 
 // TODO: Create a function to write README file
-function writeToFile(fileName, data) {
+/* function writeToFile(fileName, data) {
     fs.writeFile(fileName, data, error => {
         if(error) {
             return console.log('There was an error creating the file')
         }
     })
-}
-const generateFile = util.promisify(writeToFile);
+} */
+
+
+//const generateFile = util.promisify(writeToFile);
+
+const writeFile = fileContent => {
+    return new Promise((resolve, reject) => {
+        fs.writeFile('./dist/README.md', fileContent, err => {
+            if (err) {
+                reject(err);
+                return;
+            }
+
+            resolve({
+                ok: true,
+                message: 'File created!'
+            });
+        });
+    });
+};
 
 // TODO: Create a function to initialize app
-async function init() {
+/* async function init() {
     try {
         const answers = await inquirer.prompt(questions);
         const fileText = generateMarkdown(answers);
-        await generateFile('README.md', fileText);
+        await writeFileAsync('./dist/README.md', fileText);
+        console.log('Successfully created README');
     } catch (error){
         console.log('There was an error creating the file');
     }
-};
+}; */
 
 // Function call to initialize app
-init();
+//init();
+const init = () => {
+
+    return inquirer.prompt(questions)
+    .then(readmeData => {
+        return readmeData;
+    })
+}
+
+// Function call to initialize app
+init()
+.then(readmeData => {
+    console.log(readmeData);
+    return generateMarkdown(readmeData);
+})
+.then(pageMD => {
+    return writeFile(pageMD);
+})
+.then(writeFileResponse => {
+    console.log(writeFileResponse.message);
+})
+.catch(err => {
+    console.log(err);
+})
